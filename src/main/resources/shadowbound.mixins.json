@@ -1,0 +1,30 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.h3artless.shadowbound.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "ItemEntityMixin",
+    "LivingEntityMixin",
+    "MobEntityAccessor",
+    "MobEntityMixin",
+    "PlayerDiveMixin",
+    "PlayerEntityMixin"
+  ],
+  "client": [
+    "client.ClientPlayNetworkHandlerMixin",
+    "client.ClientPlayerEntityMixin",
+    "client.EntityOutlineColorMixin",
+    "client.GameRendererMixin",
+    "client.InGameHudMixin",
+    "client.ItemRendererMixin",
+    "client.KeyboardInputMixin",
+    "client.LivingEntityRendererMixin",
+    "client.MinecraftClientMixin",
+    "client.PlayerEntityRendererMixin",
+    "client.PostEffectProcessorAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

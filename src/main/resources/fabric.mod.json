@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "shadowbound",
+  "version": "${version}",
+  "name": "Shadowbound",
+  "description": "Blades that keep what they kill, a totem that gives you a mouthy shadow, and rituals that only work after dark.",
+  "authors": ["H3artless_YT"],
+  "license": "All-Rights-Reserved",
+  "icon": "assets/shadowbound/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.h3artless.shadowbound.Shadowbound"],
+    "client": ["com.h3artless.shadowbound.client.ShadowboundClient"]
+  },
+  "mixins": ["shadowbound.mixins.json"],
+  "accessWidener": "shadowbound.accesswidener",
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "fabric-api": "*"
+  }
+}
