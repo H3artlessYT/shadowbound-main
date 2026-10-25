@@ -1,6 +1,7 @@
 package com.h3artless.shadowbound.registry;
 
 import com.h3artless.shadowbound.Shadowbound;
+import com.h3artless.shadowbound.entity.GrimoireEntity;
 import com.h3artless.shadowbound.entity.RitualEntity;
 import com.h3artless.shadowbound.entity.ShadowCloneEntity;
 import com.h3artless.shadowbound.entity.SoulPylonEntity;
@@ -36,6 +37,15 @@ public final class ModEntities {
                     .dimensions(EntityDimensions.fixed(0.8f, 2.6f))
                     .trackRangeBlocks(96)
                     .trackedUpdateRate(2)
+                    .fireImmune()
+                    .build());
+
+    public static final EntityType<GrimoireEntity> GRIMOIRE = Registry.register(Registries.ENTITY_TYPE,
+            Shadowbound.id("grimoire"),
+            FabricEntityTypeBuilder.<GrimoireEntity>create(SpawnGroup.MISC, GrimoireEntity::new)
+                    .dimensions(EntityDimensions.fixed(0.7f, 1.6f))
+                    .trackRangeBlocks(64)
+                    .trackedUpdateRate(10)
                     .fireImmune()
                     .build());
 

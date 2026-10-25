@@ -4,7 +4,6 @@
   "package": "com.h3artless.shadowbound.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "ItemEntityMixin",
     "LivingEntityMixin",
     "MobEntityAccessor",
     "MobEntityMixin",
@@ -12,10 +11,12 @@
     "PlayerEntityMixin"
   ],
   "client": [
+    "client.BipedEntityModelMixin",
     "client.ClientPlayNetworkHandlerMixin",
     "client.ClientPlayerEntityMixin",
     "client.EntityOutlineColorMixin",
     "client.GameRendererMixin",
+    "client.HeldItemRendererMixin",
     "client.InGameHudMixin",
     "client.ItemRendererMixin",
     "client.KeyboardInputMixin",

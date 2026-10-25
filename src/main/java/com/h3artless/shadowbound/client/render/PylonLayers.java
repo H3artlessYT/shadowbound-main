@@ -14,8 +14,8 @@ public final class PylonLayers extends RenderLayer {
             "shadowbound_pylon_stone", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, VertexFormat.DrawMode.QUADS,
             1024, true, false,
             MultiPhaseParameters.builder()
-                    .program(new RenderPhase.ShaderProgram(() -> ShadowShaders.pylonStone))
-                    .texture(new RenderPhase.Texture(TEXTURE, true, false))
+                    .program(new ShaderProgram(() -> ShadowShaders.pylonStone))
+                    .texture(new Texture(TEXTURE, true, false))
                     .transparency(NO_TRANSPARENCY)
                     .cull(DISABLE_CULLING)
                     .lightmap(ENABLE_LIGHTMAP)
@@ -26,8 +26,8 @@ public final class PylonLayers extends RenderLayer {
             "shadowbound_pylon_crystal", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, VertexFormat.DrawMode.QUADS,
             256, false, true,
             MultiPhaseParameters.builder()
-                    .program(new RenderPhase.ShaderProgram(() -> ShadowShaders.pylonCrystal))
-                    .texture(new RenderPhase.Texture(TEXTURE, true, false))
+                    .program(new ShaderProgram(() -> ShadowShaders.pylonCrystal))
+                    .texture(new Texture(TEXTURE, true, false))
                     .transparency(LIGHTNING_TRANSPARENCY)
                     .cull(DISABLE_CULLING)
                     .lightmap(ENABLE_LIGHTMAP)
@@ -39,8 +39,8 @@ public final class PylonLayers extends RenderLayer {
             "shadowbound_pylon_rune", VertexFormats.POSITION_TEXTURE_COLOR, VertexFormat.DrawMode.QUADS,
             512, false, true,
             MultiPhaseParameters.builder()
-                    .program(new RenderPhase.ShaderProgram(() -> ShadowShaders.pylonRune))
-                    .texture(new RenderPhase.Texture(TEXTURE, true, false))
+                    .program(new ShaderProgram(() -> ShadowShaders.pylonRune))
+                    .texture(new Texture(TEXTURE, true, false))
                     .transparency(LIGHTNING_TRANSPARENCY)
                     .cull(DISABLE_CULLING)
                     .writeMaskState(COLOR_MASK)
@@ -50,7 +50,7 @@ public final class PylonLayers extends RenderLayer {
             "shadowbound_pylon_column", VertexFormats.POSITION_TEXTURE_COLOR, VertexFormat.DrawMode.QUADS,
             512, false, true,
             MultiPhaseParameters.builder()
-                    .program(new RenderPhase.ShaderProgram(() -> ShadowShaders.pylonColumn))
+                    .program(new ShaderProgram(() -> ShadowShaders.pylonColumn))
                     .transparency(LIGHTNING_TRANSPARENCY)
                     .cull(DISABLE_CULLING)
                     .writeMaskState(COLOR_MASK)

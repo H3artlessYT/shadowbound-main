@@ -27,6 +27,13 @@ public final class ShadowShaders {
     public static ShaderProgram pylonCrystal;
     public static ShaderProgram pylonRune;
     public static ShaderProgram pylonColumn;
+    public static ShaderProgram book;
+    public static ShaderProgram inkStroke;
+    public static ShaderProgram inkDot;
+    public static ShaderProgram airStroke;
+    public static ShaderProgram airGlyph;
+    public static ShaderProgram airSigil;
+    public static ShaderProgram cooldownSeal;
 
     private ShadowShaders() {}
 
@@ -44,6 +51,13 @@ public final class ShadowShaders {
         ctx.register(Shadowbound.id("soul_pylon_crystal"), VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, p -> pylonCrystal = p);
         ctx.register(Shadowbound.id("soul_pylon_rune"), VertexFormats.POSITION_TEXTURE_COLOR, p -> pylonRune = p);
         ctx.register(Shadowbound.id("soul_pylon_column"), VertexFormats.POSITION_TEXTURE_COLOR, p -> pylonColumn = p);
+        ctx.register(Shadowbound.id("shadow_book"), VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, p -> book = p);
+        ctx.register(Shadowbound.id("ink_stroke"), VertexFormats.POSITION_TEXTURE_COLOR, p -> inkStroke = p);
+        ctx.register(Shadowbound.id("ink_dot"), VertexFormats.POSITION_TEXTURE_COLOR, p -> inkDot = p);
+        ctx.register(Shadowbound.id("air_stroke"), VertexFormats.POSITION_TEXTURE_COLOR, p -> airStroke = p);
+        ctx.register(Shadowbound.id("air_glyph"), VertexFormats.POSITION_TEXTURE_COLOR, p -> airGlyph = p);
+        ctx.register(Shadowbound.id("air_sigil"), VertexFormats.POSITION_TEXTURE_COLOR, p -> airSigil = p);
+        ctx.register(Shadowbound.id("cooldown_seal"), VertexFormats.POSITION_TEXTURE_COLOR, p -> cooldownSeal = p);
     }
 
     private static final Matrix4f INV_VIEW = new Matrix4f();

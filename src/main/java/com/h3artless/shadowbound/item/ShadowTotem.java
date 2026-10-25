@@ -1,5 +1,7 @@
 package com.h3artless.shadowbound.item;
 
+import com.h3artless.shadowbound.cooldown.Ability;
+import com.h3artless.shadowbound.cooldown.Cooldowns;
 import com.h3artless.shadowbound.clone.CloneManager;
 import com.h3artless.shadowbound.meter.DarknessMeter;
 import com.h3artless.shadowbound.registry.ModItems;
@@ -21,7 +23,6 @@ import net.minecraft.stat.Stats;
 import net.minecraft.util.Hand;
 
 public final class ShadowTotem {
-    public static final int RECHARGE = 20 * 60 * 5;
 
     private ShadowTotem() {}
 
@@ -36,7 +37,7 @@ public final class ShadowTotem {
                 break;
             }
         }
-        if (totem == null || player.getItemCooldownManager().isCoolingDown(ModItems.TOTEM_OF_SHADOWNESS)) return false;
+        if (totem == null || !Cooldowns.ready(player, Ability.TOTEM)) return false;
 
         player.incrementStat(Stats.USED.getOrCreateStat(ModItems.TOTEM_OF_SHADOWNESS));
         Criteria.USED_TOTEM.trigger(player, totem);
@@ -48,7 +49,7 @@ public final class ShadowTotem {
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 800, 0));
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY, 100, 0, false, false, true));
 
-        player.getItemCooldownManager().set(ModItems.TOTEM_OF_SHADOWNESS, RECHARGE);
+        Cooldowns.start(player, Ability.TOTEM);
         DarknessMeter.set(player, 0);
         CloneManager.sacrifice(player);
 

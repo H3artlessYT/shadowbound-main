@@ -1,5 +1,7 @@
 package com.h3artless.shadowbound.item;
 
+import com.h3artless.shadowbound.cooldown.Ability;
+import com.h3artless.shadowbound.cooldown.Cooldowns;
 import com.h3artless.shadowbound.entity.ShadowCloneEntity;
 import com.h3artless.shadowbound.entity.SoulPylonEntity;
 import com.h3artless.shadowbound.registry.ModEnchantments;
@@ -110,7 +112,7 @@ public interface ShadowBlade {
             server.spawnEntity(pylon);
 
             stack.removeSubNbt(NBT_KEY);
-            user.getItemCooldownManager().set(stack.getItem(), 20 * 20);
+            if (user instanceof ServerPlayerEntity sp) Cooldowns.start(sp, Ability.PYLON);
         }
         user.swingHand(hand);
         return TypedActionResult.success(stack, world.isClient());
@@ -129,6 +131,11 @@ public interface ShadowBlade {
         if (list.isEmpty()) return TypedActionResult.pass(stack);
 
         int pylon = EnchantmentHelper.getLevel(ModEnchantments.SOUL_PYLON, stack);
+        Ability ability = pylon > 0 ? Ability.PYLON : Ability.SHADOWS;
+        if (!Cooldowns.ready(user, ability)) {
+            if (user instanceof ServerPlayerEntity sp) Cooldowns.deny(sp, ability);
+            return TypedActionResult.fail(stack);
+        }
         if (pylon > 0) {
             return raisePylon(world, user, hand, stack, list.size(), pylon);
         }
@@ -144,7 +151,7 @@ public interface ShadowBlade {
                 spawnShadow(server, user, entry, pos, baseYaw + spread);
             }
             stack.removeSubNbt(NBT_KEY);
-            user.getItemCooldownManager().set(stack.getItem(), 40);
+            if (user instanceof ServerPlayerEntity sp) Cooldowns.start(sp, Ability.SHADOWS);
 
             server.playSound(null, user.getX(), user.getY(), user.getZ(),
                     SoundEvents.ENTITY_EVOKER_CAST_SPELL, SoundCategory.PLAYERS, 1.0f, 0.5f);

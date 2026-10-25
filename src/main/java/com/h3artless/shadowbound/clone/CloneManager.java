@@ -1,5 +1,7 @@
 package com.h3artless.shadowbound.clone;
 
+import com.h3artless.shadowbound.cooldown.Ability;
+import com.h3artless.shadowbound.cooldown.Cooldowns;
 import com.h3artless.shadowbound.entity.ShadowCloneEntity;
 import com.h3artless.shadowbound.item.TotemOfShadownessItem;
 import com.h3artless.shadowbound.registry.ModEntities;
@@ -19,20 +21,17 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class CloneManager {
-    private static final int RESPAWN_COOLDOWN = 20 * 30;
     private static final Map<UUID, Slot> SLOTS = new HashMap<>();
 
     private static final class Slot {
         UUID cloneId;
         ShadowCloneEntity entity;
-        int cooldown;
     }
 
     private CloneManager() {}
 
     public static void tick(ServerPlayerEntity player) {
         Slot slot = SLOTS.computeIfAbsent(player.getUuid(), k -> new Slot());
-        if (slot.cooldown > 0) slot.cooldown--;
 
         if (SpyManager.isSpying(player)) return;
 
@@ -54,7 +53,7 @@ public final class CloneManager {
             }
         }
 
-        if (slot.cooldown == 0) {
+        if (Cooldowns.ready(player, Ability.SHADOW_RESPAWN)) {
             slot.cloneId = summon(player);
         }
     }
@@ -105,8 +104,8 @@ public final class CloneManager {
         Slot slot = SLOTS.get(owner.getUuid());
         if (slot != null) {
             slot.cloneId = null;
-            slot.cooldown = RESPAWN_COOLDOWN;
         }
+        if (owner instanceof ServerPlayerEntity sp) Cooldowns.start(sp, Ability.SHADOW_RESPAWN);
     }
 
     public static void sacrifice(ServerPlayerEntity player) {
@@ -117,7 +116,7 @@ public final class CloneManager {
             clone.poof();
         }
         slot.cloneId = null;
-        slot.cooldown = RESPAWN_COOLDOWN;
+        Cooldowns.start(player, Ability.SHADOW_RESPAWN);
     }
 
     public static void forget(ServerPlayerEntity player) {

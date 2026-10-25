@@ -1,7 +1,10 @@
 package com.h3artless.shadowbound;
 
 import com.h3artless.shadowbound.clone.CloneManager;
+import com.h3artless.shadowbound.cooldown.Cooldowns;
 import com.h3artless.shadowbound.item.ShadowBlade;
+import com.h3artless.shadowbound.loot.ShadowLoot;
+import com.h3artless.shadowbound.ritual.CastPoses;
 import com.h3artless.shadowbound.meter.DarknessMeter;
 import com.h3artless.shadowbound.net.ModPackets;
 import com.h3artless.shadowbound.registry.ModEffects;
@@ -12,6 +15,7 @@ import com.h3artless.shadowbound.spy.SpyManager;
 import com.h3artless.shadowbound.dive.ShadowDive;
 import com.h3artless.shadowbound.registry.ModBlocks;
 import com.h3artless.shadowbound.registry.ModEnchantments;
+import com.h3artless.shadowbound.registry.ModParticles;
 import com.h3artless.shadowbound.snuff.SnuffOut;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
@@ -49,7 +53,9 @@ public class Shadowbound implements ModInitializer {
         ModEntities.init();
         ModEffects.init();
         ModEnchantments.init();
+        ModParticles.init();
         ModPackets.initServer();
+        ShadowLoot.init();
 
         ServerEntityCombatEvents.AFTER_KILLED_OTHER_ENTITY.register((world, killer, killed) -> {
             if (killer instanceof ServerPlayerEntity player) {
@@ -78,22 +84,30 @@ public class Shadowbound implements ModInitializer {
         UseItemCallback.EVENT.register((player, world, hand) ->
                 ShadowDive.isDiving(player) ? TypedActionResult.fail(player.getStackInHand(hand)) : TypedActionResult.pass(player.getStackInHand(hand)));
 
-        ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) ->
-                DarknessMeter.copy(oldPlayer, newPlayer));
+        ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
+            DarknessMeter.copy(oldPlayer, newPlayer);
+            Cooldowns.copy(oldPlayer, newPlayer);
+        });
+        ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> Cooldowns.sync(newPlayer));
 
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             SpyManager.onDisconnect(handler.player);
             CloneManager.forget(handler.player);
             DarknessMeter.forget(handler.player);
             ShadowDive.forget(handler.player);
+            CastPoses.forget(handler.player);
         });
 
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> SpyManager.onJoin(handler.player));
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            SpyManager.onJoin(handler.player);
+            Cooldowns.sync(handler.player);
+        });
 
         ServerTickEvents.END_SERVER_TICK.register(SnuffOut::tick);
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 DarknessMeter.tick(player);
+                Cooldowns.tick(player);
                 CloneManager.tick(player);
                 SpyManager.tick(player);
                 ShadowDive.tick(player);

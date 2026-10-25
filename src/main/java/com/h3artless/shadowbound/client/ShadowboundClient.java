@@ -1,6 +1,17 @@
 package com.h3artless.shadowbound.client;
 
+import com.h3artless.shadowbound.client.cast.AirCasting;
+import com.h3artless.shadowbound.client.cast.ClientCastPoses;
+import com.h3artless.shadowbound.client.particle.ShadowParticles;
+import com.h3artless.shadowbound.client.cast.PaperScreen;
+import com.h3artless.shadowbound.client.render.AirCastFx;
+import com.h3artless.shadowbound.client.render.GrimoireRenderer;
+import com.h3artless.shadowbound.entity.GrimoireEntity;
+import com.h3artless.shadowbound.item.ShadowPaperItem;
+import net.minecraft.client.MinecraftClient;
+import com.h3artless.shadowbound.client.hud.CooldownHud;
 import com.h3artless.shadowbound.client.hud.DarknessMeterHud;
+import com.h3artless.shadowbound.cooldown.Cooldowns;
 import com.h3artless.shadowbound.client.hud.WatchedOverlay;
 import com.h3artless.shadowbound.client.render.BladeModels;
 import com.h3artless.shadowbound.client.render.FxQuality;
@@ -46,6 +57,12 @@ public class ShadowboundClient implements ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.SHADOW_CLONE, ShadowCloneRenderer::new);
         EntityRendererRegistry.register(ModEntities.RITUAL, RitualRenderer::new);
         EntityRendererRegistry.register(ModEntities.SOUL_PYLON, SoulPylonRenderer::new);
+        EntityRendererRegistry.register(ModEntities.GRIMOIRE, GrimoireRenderer::new);
+
+        ShadowParticles.init();
+        GrimoireEntity.openCast = AirCasting::start;
+        GrimoireEntity.casting = AirCasting::isCasting;
+        ShadowPaperItem.openPaper = (rite, step) -> MinecraftClient.getInstance().setScreen(new PaperScreen(rite, step));
 
         FxQuality.load();
         CoreShaderRegistrationCallback.EVENT.register(ShadowShaders::register);
@@ -73,16 +90,32 @@ public class ShadowboundClient implements ClientModInitializer {
             int id = buf.readVarInt();
             client.execute(() -> SpyCamera.begin(id));
         });
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.COOLDOWN_SYNC, (client, handler, buf, sender) -> {
+            int n = buf.readVarInt();
+            int[] values = new int[n];
+            for (int i = 0; i < n; i++) values[i] = buf.readVarInt();
+            client.execute(() -> {
+                if (client.player != null) Cooldowns.apply(client.player, values);
+            });
+        });
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.CAST_POSE_SYNC, (client, handler, buf, sender) -> {
+            int id = buf.readVarInt();
+            boolean on = buf.readBoolean();
+            client.execute(() -> ClientCastPoses.set(id, on));
+        });
         ClientPlayNetworking.registerGlobalReceiver(ModPackets.SPY_STOP, (client, handler, buf, sender) ->
                 client.execute(SpyCamera::end));
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             SpyCamera.reset();
+            AirCasting.reset();
+            ClientCastPoses.clear();
             DiveVision.reset();
             DiveTrails.reset();
             ClientShadowState.setDarkness(0);
         });
 
+        ClientTickEvents.START_CLIENT_TICK.register(AirCasting::tick);
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (spyKey.wasPressed()) {
                 if (client.player == null) continue;
@@ -106,17 +139,21 @@ public class ShadowboundClient implements ClientModInitializer {
             DiveVision.tick(client);
             DiveTrails.tick(client);
             DarknessMeterHud.tick(client);
+            CooldownHud.tick(client);
             WatchedOverlay.tick(client);
         });
 
         HudRenderCallback.EVENT.register((ctx, tickDelta) -> {
             WatchedOverlay.render(ctx, tickDelta);
+            AirCasting.renderHud(ctx, tickDelta);
             DarknessMeterHud.render(ctx, tickDelta);
+            CooldownHud.render(ctx, tickDelta);
         });
 
         WorldRenderEvents.START.register(ShadowShaders::updateSmoke);
         WorldRenderEvents.AFTER_TRANSLUCENT.register(RitualFx::draw);
         WorldRenderEvents.AFTER_TRANSLUCENT.register(SoulPylonFx::draw);
+        WorldRenderEvents.AFTER_TRANSLUCENT.register(AirCastFx::draw);
         WorldRenderEvents.END.register(ctx -> {
             DiveVision.renderPost(ctx.tickDelta());
             SpyCamera.renderPost(ctx.tickDelta());
