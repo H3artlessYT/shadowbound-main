@@ -14,7 +14,7 @@ import java.util.Locale;
 
 public enum ShadowRitual {
     CLEAVER(0xff5a3a, new String[]{"qwqwqwq", "wwaqqwqqa", "edeqaqe"},
-            List.of(new Part(Items.NETHERITE_AXE, 1), new Part(Items.NETHERITE_INGOT, 1), new Part(Items.GOLD_BLOCK, 1))) {
+            List.of(new Part(Items.NETHERITE_AXE, 1), new Part(Items.NETHERITE_INGOT, 1), new Part(Items.GOLD_BLOCK, 2))) {
         @Override public ItemStack result() { return new ItemStack(ModItems.SHADOW_CLEAVER); }
     },
     LONGSWORD(0xff2a3c, new String[]{"wwwwdd", "qaqwqaq", "wdwawdw"},
@@ -22,7 +22,7 @@ public enum ShadowRitual {
         @Override public ItemStack result() { return new ItemStack(ModItems.SHADOW_LONGSWORD); }
     },
     TOTEM(0xd0102c, new String[]{"eeeeeqw", "aqaaqa", "qqwqqwqq"},
-            List.of(new Part(Items.TOTEM_OF_UNDYING, 1), new Part(Items.DIAMOND_BLOCK, 2), new Part(Items.BLAZE_ROD, 10))) {
+            List.of(new Part(Items.TOTEM_OF_UNDYING, 1), new Part(Items.DIAMOND_BLOCK, 2), new Part(Items.NETHERITE_INGOT, 10))) {
         @Override public ItemStack result() { return new ItemStack(ModItems.TOTEM_OF_SHADOWNESS); }
     },
     SOUL_PYLON(0xb01020, new String[]{"dadadad", "dwwdaawwd", "awawqwa"},
@@ -30,6 +30,24 @@ public enum ShadowRitual {
         @Override public ItemStack result() {
             return EnchantedBookItem.forEnchantment(new EnchantmentLevelEntry(ModEnchantments.SOUL_PYLON, 1));
         }
+    },
+    TRIDENT(0xc8142e, new String[]{"wwwaqwqd", "eqwqedwd", "aawwaww"},
+            List.of(new Part(Items.BLAZE_ROD, 1), new Part(Items.DIAMOND_BLOCK, 2), new Part(Items.NETHERITE_INGOT, 1))) {
+        @Override public ItemStack result() { return new ItemStack(ModItems.SHADOW_TRIDENT); }
+    },
+    KATANA(0x9a1030, new String[]{"wwwwwwq", "wwdwwdww", "eaeaewe"},
+            List.of(new Part(Items.NETHERITE_SWORD, 1), new Part(Items.NETHER_STAR, 1), new Part(Items.NETHERITE_INGOT, 8),
+                    new Part(Items.BONE, 16))) {
+        @Override public ItemStack result() { return new ItemStack(ModItems.SHADOW_KATANA); }
+    },
+    HOOK(0xb01a30, new String[]{"wwwqqww", "qeqeqdd", "adadwad"},
+            List.of(new Part(Items.CHAIN, 8), new Part(Items.ECHO_SHARD, 2), new Part(Items.NETHERITE_SCRAP, 1))) {
+        @Override public ItemStack result() { return new ItemStack(ModItems.SHADOW_HOOK); }
+    },
+    BOX(0x7a1030, new String[]{"wweewweew", "qqwwqqww", "ewwaawwe"},
+            List.of(new Part(Items.RECOVERY_COMPASS, 1), new Part(Items.ENDER_PEARL, 8), new Part(Items.ECHO_SHARD, 4),
+                    new Part(Items.CRYING_OBSIDIAN, 16))) {
+        @Override public ItemStack result() { return new ItemStack(ModItems.SHADOW_BOX); }
     };
 
     public record Part(Item item, int count) {}
@@ -62,10 +80,31 @@ public enum ShadowRitual {
         return name().toLowerCase(Locale.ROOT);
     }
 
+    public static final int MAX_SHOWN = 12;
+    private List<Item> shown;
+
+    public List<Item> shown() {
+        if (shown == null) {
+            List<Item> out = new java.util.ArrayList<>();
+            int[] left = new int[parts.size()];
+            for (int i = 0; i < left.length; i++) left[i] = parts.get(i).count();
+            boolean any = true;
+            while (any && out.size() < MAX_SHOWN) {
+                any = false;
+                for (int i = 0; i < left.length && out.size() < MAX_SHOWN; i++) {
+                    if (left[i] <= 0) continue;
+                    left[i]--;
+                    out.add(parts.get(i).item());
+                    any = true;
+                }
+            }
+            shown = List.copyOf(out);
+        }
+        return shown;
+    }
+
     public int offeringCount() {
-        int n = 0;
-        for (Part part : parts) n += part.count();
-        return n;
+        return shown().size();
     }
 
     public static ShadowRitual byId(int id) {

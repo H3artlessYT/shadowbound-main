@@ -29,8 +29,8 @@ public class TotemOfShadownessItem extends Item {
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        tooltip.add(Text.translatable("tooltip.shadowbound.totem.0").formatted(Formatting.DARK_PURPLE));
-        tooltip.add(Text.translatable("tooltip.shadowbound.totem.2").formatted(Formatting.DARK_PURPLE));
+        tooltip.add(Text.translatable("tooltip.shadowbound.totem.0").formatted(Formatting.DARK_RED));
+        tooltip.add(Text.translatable("tooltip.shadowbound.totem.2").formatted(Formatting.DARK_RED));
         tooltip.add(Text.translatable("tooltip.shadowbound.totem.3").formatted(Formatting.GRAY));
         tooltip.add(Text.translatable("tooltip.shadowbound.totem.1").formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
     }

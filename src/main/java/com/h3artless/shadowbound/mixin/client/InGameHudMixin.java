@@ -16,6 +16,8 @@ public abstract class InGameHudMixin {
         if (SpyCamera.isActive()) {
             SpyHud.render(ctx, tickDelta);
             ci.cancel();
+        } else if (SpyCamera.locked()) {
+            ci.cancel();
         }
     }
 }

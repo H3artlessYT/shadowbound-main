@@ -12,6 +12,7 @@ import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -81,9 +82,7 @@ public class RitualRenderer extends EntityRenderer<RitualEntity> {
     static List<ItemStack> offerings(ShadowRitual ritual) {
         return OFFERINGS.computeIfAbsent(ritual, r -> {
             List<ItemStack> out = new ArrayList<>();
-            for (ShadowRitual.Part part : r.parts) {
-                for (int i = 0; i < part.count(); i++) out.add(new ItemStack(part.item()));
-            }
+            for (Item item : r.shown()) out.add(new ItemStack(item));
             return out;
         });
     }

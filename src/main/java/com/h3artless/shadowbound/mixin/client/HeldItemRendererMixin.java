@@ -1,6 +1,7 @@
 package com.h3artless.shadowbound.mixin.client;
 
 import com.h3artless.shadowbound.client.cast.AirCasting;
+import com.h3artless.shadowbound.registry.ModItems;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.HeldItemRenderer;
@@ -26,7 +27,15 @@ public abstract class HeldItemRendererMixin {
     private void shadowbound$pointingHand(AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand,
                                           float swingProgress, ItemStack item, float equipProgress, MatrixStack matrices,
                                           VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
-        if (!AirCasting.active()) return;
+        if (!AirCasting.active()) {
+            if (!item.isEmpty() && item.isOf(ModItems.SHADOW_ROBOT) && !player.isInvisible()) {
+                Arm arm = hand == Hand.MAIN_HAND ? player.getMainArm() : player.getMainArm().getOpposite();
+                matrices.push();
+                renderArmHoldingItem(matrices, vertexConsumers, light, equipProgress, swingProgress, arm);
+                matrices.pop();
+            }
+            return;
+        }
         ci.cancel();
         if (hand != Hand.MAIN_HAND) return;
         Arm arm = player.getMainArm();

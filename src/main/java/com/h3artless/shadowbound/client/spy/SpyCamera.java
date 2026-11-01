@@ -22,6 +22,33 @@ public final class SpyCamera {
     @Nullable private static PostEffectProcessor post;
     private static int postW, postH;
     private static float fade, prevFade;
+    private static int pending;
+    private static boolean hudSaved, hudWas;
+
+    public static boolean locked() {
+        return active || pending > 0;
+    }
+
+    public static void request() {
+        pending = 100;
+        hideHud();
+    }
+
+    private static void hideHud() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (!hudSaved) {
+            hudWas = client.options.hudHidden;
+            hudSaved = true;
+        }
+        client.options.hudHidden = true;
+        client.options.debugEnabled = false;
+    }
+
+    private static void restoreHud() {
+        if (!hudSaved) return;
+        MinecraftClient.getInstance().options.hudHidden = hudWas;
+        hudSaved = false;
+    }
 
     private SpyCamera() {}
 
@@ -45,11 +72,16 @@ public final class SpyCamera {
         targetId = entityId;
         if (!active) savedPerspective = client.options.getPerspective();
         active = true;
+        pending = 0;
+        hideHud();
+        fade = prevFade = 1f;
         client.options.setPerspective(Perspective.THIRD_PERSON_BACK);
         if (client.player != null) client.player.playSound(SoundEvents.ENTITY_ENDERMAN_STARE, 0.5f, 0.6f);
     }
 
     public static void end() {
+        pending = 0;
+        restoreHud();
         if (!active) return;
         MinecraftClient client = MinecraftClient.getInstance();
         active = false;
@@ -66,6 +98,11 @@ public final class SpyCamera {
 
     public static void tick(MinecraftClient client) {
         prevFade = fade;
+        if (pending > 0 && !active && --pending == 0) restoreHud();
+        if (locked()) {
+            client.options.hudHidden = true;
+            client.options.debugEnabled = false;
+        }
         fade = MathHelper.clamp(fade + (active ? 0.07f : -0.1f), 0f, 1f);
         if (!active && fade == 0f && post != null) closePost();
         if (active && client.options.getPerspective() != Perspective.THIRD_PERSON_BACK) {

@@ -60,7 +60,8 @@ public class ShadowCloneEntity extends PathAwareEntity {
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 10.0)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.33)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 1.0)
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 24.0);
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 24.0)
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, 4.0);
     }
 
     @Override
@@ -72,7 +73,23 @@ public class ShadowCloneEntity extends PathAwareEntity {
     @Override
     protected void initGoals() {
         this.goalSelector.add(0, new SwimGoal(this));
-        this.goalSelector.add(2, new MeleeAttackGoal(this, 1.3, true));
+        this.goalSelector.add(2, new MeleeAttackGoal(this, 1.3, true) {
+            private int swing;
+
+            @Override
+            public void tick() {
+                super.tick();
+                if (swing > 0) swing--;
+            }
+
+            @Override
+            protected void attack(LivingEntity target, double squaredDistance) {
+                if (squaredDistance <= getSquaredMaxAttackDistance(target) && swing <= 0) {
+                    swing = swingTicks();
+                    tryAttack(target);
+                }
+            }
+        });
         this.goalSelector.add(5, new ShadowFollowOwnerGoal(this, this::getOwnerUuid, 1.15, 5f, 2.5f));
         this.goalSelector.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 8f));
         this.goalSelector.add(9, new LookAroundGoal(this));
@@ -81,20 +98,7 @@ public class ShadowCloneEntity extends PathAwareEntity {
     public void setup(PlayerEntity owner) {
         this.dataTracker.set(OWNER, Optional.of(owner.getUuid()));
 
-        equipStack(EquipmentSlot.HEAD, trimmed(Items.NETHERITE_HELMET));
-        equipStack(EquipmentSlot.CHEST, trimmed(Items.NETHERITE_CHESTPLATE));
-        equipStack(EquipmentSlot.LEGS, trimmed(Items.NETHERITE_LEGGINGS));
-        equipStack(EquipmentSlot.FEET, trimmed(Items.NETHERITE_BOOTS));
-        equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.NETHERITE_SWORD));
-    }
-
-    private static ItemStack trimmed(net.minecraft.item.Item item) {
-        ItemStack stack = new ItemStack(item);
-        NbtCompound trim = new NbtCompound();
-        trim.putString("material", "minecraft:netherite");
-        trim.putString("pattern", "minecraft:silence");
-        stack.getOrCreateNbt().put("Trim", trim);
-        return stack;
+        copyGear(owner);
     }
 
     @Nullable
@@ -127,7 +131,7 @@ public class ShadowCloneEntity extends PathAwareEntity {
             ShadowAllies.aim(this, ShadowAllies.pickTarget(this, owner));
         }
         mirror(owner);
-        if (this.age % 20 == 0) copyTrims(owner);
+        if (this.age % 10 == 0) copyGear(owner);
 
         double moved = getVelocity().horizontalLengthSquared();
         if (moved > 0.002 && ++stepSound >= 9) {
@@ -152,26 +156,19 @@ public class ShadowCloneEntity extends PathAwareEntity {
 
     private static final EquipmentSlot[] ARMOR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
-    private void copyTrims(PlayerEntity owner) {
-        for (EquipmentSlot slot : ARMOR) {
-            NbtCompound theirs = owner.getEquippedStack(slot).getSubNbt("Trim");
-            ItemStack mine = getEquippedStack(slot);
-            if (mine.isEmpty()) continue;
-            NbtCompound want = theirs != null ? theirs.copy() : silence();
-            NbtCompound have = mine.getSubNbt("Trim");
-            if (!want.equals(have)) {
-                ItemStack updated = mine.copy();
-                updated.getOrCreateNbt().put("Trim", want);
-                equipStack(slot, updated);
-            }
-        }
+    public int swingTicks() {
+        double speed = Math.max(0.25, getAttributeValue(EntityAttributes.GENERIC_ATTACK_SPEED));
+        return MathHelper.clamp((int) Math.round(20.0 / speed), 2, 100);
     }
 
-    private static NbtCompound silence() {
-        NbtCompound trim = new NbtCompound();
-        trim.putString("material", "minecraft:netherite");
-        trim.putString("pattern", "minecraft:silence");
-        return trim;
+    private void copyGear(PlayerEntity owner) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            ItemStack theirs = owner.getEquippedStack(slot);
+            if (!com.h3artless.shadowbound.config.ShadowConfig.shadowMayHold(theirs)) theirs = ItemStack.EMPTY;
+            ItemStack mine = getEquippedStack(slot);
+            if (ItemStack.areEqual(theirs, mine)) continue;
+            equipStack(slot, theirs.copy());
+        }
     }
 
     @Override
@@ -208,7 +205,13 @@ public class ShadowCloneEntity extends PathAwareEntity {
     public boolean tryAttack(net.minecraft.entity.Entity target) {
         swingHand(Hand.MAIN_HAND);
         boolean hit = super.tryAttack(target);
-        if (hit && getWorld() instanceof ServerWorld sw) {
+        boolean fist = getMainHandStack().isEmpty();
+        boolean sweeps = getMainHandStack().getItem() instanceof net.minecraft.item.SwordItem;
+        if (hit && fist) {
+            playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.8f, 0.9f + random.nextFloat() * 0.2f);
+        } else if (hit && !sweeps) {
+            playSound(SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, 0.8f, 0.9f + random.nextFloat() * 0.2f);
+        } else if (hit && getWorld() instanceof ServerWorld sw) {
             float yaw = getYaw() * MathHelper.RADIANS_PER_DEGREE;
             double dx = -MathHelper.sin(yaw), dz = MathHelper.cos(yaw);
             sw.spawnParticles(ParticleTypes.SWEEP_ATTACK, getX() + dx, getBodyY(0.5), getZ() + dz, 0, dx, 0, dz, 0);
@@ -216,7 +219,7 @@ public class ShadowCloneEntity extends PathAwareEntity {
         } else if (!hit) {
             playSound(SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, 0.6f, 0.9f);
         }
-        if (hit && target instanceof LivingEntity living && !living.isAlive()) {
+        if (hit && !getWorld().isClient && target instanceof LivingEntity living && !living.isAlive()) {
             PlayerEntity owner = getOwner();
             if (owner != null) Taunts.onKill(this, owner, living);
         }
@@ -226,7 +229,7 @@ public class ShadowCloneEntity extends PathAwareEntity {
     @Override
     public boolean damage(DamageSource source, float amount) {
         boolean hurt = super.damage(source, amount);
-        if (hurt && isAlive() && random.nextInt(20) == 0) {
+        if (hurt && !getWorld().isClient && isAlive() && random.nextInt(20) == 0) {
             PlayerEntity owner = getOwner();
             if (owner != null) Taunts.onHurt(this, owner);
         }

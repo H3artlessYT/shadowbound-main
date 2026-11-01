@@ -1,7 +1,10 @@
 package com.h3artless.shadowbound.meter;
 
+import com.h3artless.shadowbound.block.ShadowLights;
 import com.h3artless.shadowbound.dive.ShadowDive;
+import com.h3artless.shadowbound.item.ShadowTridentItem;
 import com.h3artless.shadowbound.item.TotemOfShadownessItem;
+import net.minecraft.entity.player.PlayerEntity;
 import com.h3artless.shadowbound.net.ModPackets;
 import com.h3artless.shadowbound.spy.SpyManager;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -23,6 +26,10 @@ public final class DarknessMeter {
 
     private DarknessMeter() {}
 
+    public static boolean attuned(PlayerEntity player) {
+        return TotemOfShadownessItem.isHolding(player) || ShadowTridentItem.isHolding(player);
+    }
+
     public static int get(ServerPlayerEntity p) {
         return ((DarknessHolder) p).shadowbound$getDarkness();
     }
@@ -32,8 +39,8 @@ public final class DarknessMeter {
     }
 
     public static void tick(ServerPlayerEntity player) {
-        if (TotemOfShadownessItem.isHolding(player) && !SpyManager.isSpying(player) && !ShadowDive.isDiving(player)) {
-            int light = player.getWorld().getLightLevel(BlockPos.ofFloored(player.getEyePos()));
+        if (attuned(player) && !SpyManager.isSpying(player) && !ShadowDive.isDiving(player)) {
+            int light = ShadowLights.level(player.getWorld(), BlockPos.ofFloored(player.getEyePos()));
             int v = get(player);
             if (light < LIGHT_THRESHOLD) {
                 set(player, v + 1);

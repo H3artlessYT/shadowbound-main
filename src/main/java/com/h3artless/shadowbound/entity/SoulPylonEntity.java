@@ -114,7 +114,7 @@ public class SoulPylonEntity extends Entity {
     }
 
     private void regen(ServerWorld world, PlayerEntity owner) {
-        int amp = getLevel() - 1;
+        int amp = Math.max(0, getLevel() - 2);
         int left = Math.max(20, LIFETIME - age);
         give(owner, amp, left);
         for (ShadowCloneEntity clone : world.getEntitiesByClass(ShadowCloneEntity.class, getBoundingBox().expand(16),
@@ -139,9 +139,10 @@ public class SoulPylonEntity extends Entity {
         int level = getLevel();
         dataTracker.set(SOULS, getSouls() - 1);
 
-        float heal = 2f + 2f * level;
-        float absorbAdd = 2f * level;
-        float absorbCap = 4f + 4f * level;
+        float mult = com.h3artless.shadowbound.config.ShadowConfig.pylonHeal();
+        float heal = (2f + 2f * level) * mult;
+        float absorbAdd = 2f * level * mult;
+        float absorbCap = (4f + 4f * level) * mult;
         owner.heal(heal);
         owner.setAbsorptionAmount(Math.min(absorbCap, Math.max(owner.getAbsorptionAmount(), 0f) + absorbAdd));
 

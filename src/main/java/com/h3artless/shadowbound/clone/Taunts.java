@@ -28,7 +28,7 @@ public final class Taunts {
     private Taunts() {}
 
     public static void mouthOff(ShadowCloneEntity clone, PlayerEntity owner) {
-        ServerWorld world = (ServerWorld) clone.getWorld();
+        if (!(clone.getWorld() instanceof ServerWorld world)) return;
         Random r = clone.getRandom();
 
         List<ServerPlayerEntity> others = world.getPlayers(p -> p != owner && !p.isSpectator()
@@ -77,11 +77,11 @@ public final class Taunts {
     }
 
     private static void say(ShadowCloneEntity clone, PlayerEntity owner, MutableText body) {
+        if (!(clone.getWorld() instanceof ServerWorld world)) return;
         Text msg = Text.translatable("chat.shadowbound.clone.prefix", owner.getName())
-                .formatted(Formatting.DARK_PURPLE)
+                .formatted(Formatting.DARK_RED)
                 .append(body.formatted(Formatting.GRAY, Formatting.ITALIC));
 
-        ServerWorld world = (ServerWorld) clone.getWorld();
         for (ServerPlayerEntity p : world.getPlayers()) {
             if (p.squaredDistanceTo(clone) < HEAR_RANGE * HEAR_RANGE) {
                 p.sendMessage(msg, false);

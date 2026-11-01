@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class KeyboardInputMixin extends Input {
     @Inject(method = "tick", at = @At("TAIL"))
     private void shadowbound$freeze(boolean slowDown, float slowDownFactor, CallbackInfo ci) {
-        if (!SpyCamera.isActive()) return;
+        if (!SpyCamera.locked()) return;
         this.pressingForward = this.pressingBack = this.pressingLeft = this.pressingRight = false;
         this.jumping = this.sneaking = false;
         this.movementForward = 0f;

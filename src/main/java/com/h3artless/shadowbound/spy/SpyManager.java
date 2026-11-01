@@ -31,7 +31,7 @@ public final class SpyManager {
     public static final int START_COST = 300;
     public static final int DRAIN_PER_TICK = 3;
 
-    private static final int SETTLE = 8;
+    private static final int SETTLE = 1;
 
     private static final class Session {
         final UUID target;
@@ -99,6 +99,13 @@ public final class SpyManager {
         player.stopRiding();
         player.changeGameMode(GameMode.SPECTATOR);
         player.teleport(target.getServerWorld(), target.getX(), target.getY() + 1.0, target.getZ(), target.getYaw(), target.getPitch());
+        ServerPlayNetworking.send(player, ModPackets.SPY_START, startBuf(target));
+    }
+
+    private static PacketByteBuf startBuf(ServerPlayerEntity target) {
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeVarInt(target.getId());
+        return buf;
     }
 
     public static void stop(ServerPlayerEntity player, boolean notify) {

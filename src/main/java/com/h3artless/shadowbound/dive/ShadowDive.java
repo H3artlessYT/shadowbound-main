@@ -1,5 +1,6 @@
 package com.h3artless.shadowbound.dive;
 
+import com.h3artless.shadowbound.block.ShadowLights;
 import com.h3artless.shadowbound.item.TotemOfShadownessItem;
 import com.h3artless.shadowbound.meter.DarknessMeter;
 import com.h3artless.shadowbound.shadow.ShadowAllies;
@@ -50,7 +51,7 @@ public final class ShadowDive {
     }
 
     public static int lightAt(ServerPlayerEntity p) {
-        return p.getWorld().getLightLevel(BlockPos.ofFloored(p.getX(), p.getY() + 0.2, p.getZ()));
+        return ShadowLights.level(p.getWorld(), BlockPos.ofFloored(p.getX(), p.getY() + 0.2, p.getZ()));
     }
 
     public static void toggle(ServerPlayerEntity p) {

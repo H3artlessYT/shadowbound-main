@@ -10,14 +10,14 @@ import net.minecraft.util.Util;
 import java.util.function.Function;
 
 public final class SmokeLayers extends RenderLayer {
-    private static final ShaderProgram SMOKE = new ShaderProgram(() -> ShadowShaders.smoke);
+    private static final RenderPhase.ShaderProgram SMOKE = new RenderPhase.ShaderProgram(() -> ShadowShaders.smoke);
 
     private static final Function<Identifier, RenderLayer> BODY = Util.memoize(tex -> RenderLayer.of(
             "shadowbound_smoke_body", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, VertexFormat.DrawMode.QUADS,
             256, true, true,
             MultiPhaseParameters.builder()
                     .program(SMOKE)
-                    .texture(new Texture(tex, false, false))
+                    .texture(new RenderPhase.Texture(tex, false, false))
                     .transparency(TRANSLUCENT_TRANSPARENCY)
                     .cull(DISABLE_CULLING)
                     .lightmap(ENABLE_LIGHTMAP)
@@ -29,7 +29,7 @@ public final class SmokeLayers extends RenderLayer {
             256, false, true,
             MultiPhaseParameters.builder()
                     .program(SMOKE)
-                    .texture(new Texture(tex, false, false))
+                    .texture(new RenderPhase.Texture(tex, false, false))
                     .transparency(TRANSLUCENT_TRANSPARENCY)
                     .cull(DISABLE_CULLING)
                     .lightmap(ENABLE_LIGHTMAP)
@@ -37,7 +37,7 @@ public final class SmokeLayers extends RenderLayer {
                     .writeMaskState(COLOR_MASK)
                     .build(false)));
 
-    private static final ShaderProgram WISP_PROGRAM = new ShaderProgram(() -> ShadowShaders.wisp);
+    private static final RenderPhase.ShaderProgram WISP_PROGRAM = new RenderPhase.ShaderProgram(() -> ShadowShaders.wisp);
 
     private static final RenderLayer WISP = RenderLayer.of(
             "shadowbound_wisp", VertexFormats.POSITION_TEXTURE_COLOR, VertexFormat.DrawMode.QUADS,
@@ -49,7 +49,7 @@ public final class SmokeLayers extends RenderLayer {
                     .writeMaskState(COLOR_MASK)
                     .build(false));
 
-    private static final ShaderProgram PUDDLE_PROGRAM = new ShaderProgram(() -> ShadowShaders.puddle);
+    private static final RenderPhase.ShaderProgram PUDDLE_PROGRAM = new RenderPhase.ShaderProgram(() -> ShadowShaders.puddle);
 
     private static final RenderLayer PUDDLE = RenderLayer.of(
             "shadowbound_puddle", VertexFormats.POSITION_TEXTURE_COLOR, VertexFormat.DrawMode.QUADS,
@@ -62,8 +62,8 @@ public final class SmokeLayers extends RenderLayer {
                     .layering(VIEW_OFFSET_Z_LAYERING)
                     .build(false));
 
-    private static final ShaderProgram TRAIL_PROGRAM = new ShaderProgram(() -> ShadowShaders.trail);
-    private static final ShaderProgram PUFF_PROGRAM = new ShaderProgram(() -> ShadowShaders.puff);
+    private static final RenderPhase.ShaderProgram TRAIL_PROGRAM = new RenderPhase.ShaderProgram(() -> ShadowShaders.trail);
+    private static final RenderPhase.ShaderProgram PUFF_PROGRAM = new RenderPhase.ShaderProgram(() -> ShadowShaders.puff);
 
     private static final RenderLayer TRAIL = RenderLayer.of(
             "shadowbound_trail", VertexFormats.POSITION_TEXTURE_COLOR, VertexFormat.DrawMode.QUADS,
@@ -81,7 +81,7 @@ public final class SmokeLayers extends RenderLayer {
             1024, false, true,
             MultiPhaseParameters.builder()
                     .program(PUFF_PROGRAM)
-                    .texture(new Texture(RitualFx.SPRITES, false, false))
+                    .texture(new RenderPhase.Texture(RitualFx.SPRITES, false, false))
                     .transparency(TRANSLUCENT_TRANSPARENCY)
                     .cull(DISABLE_CULLING)
                     .writeMaskState(COLOR_MASK)
@@ -92,7 +92,7 @@ public final class SmokeLayers extends RenderLayer {
             256, false, true,
             MultiPhaseParameters.builder()
                     .program(PUFF_PROGRAM)
-                    .texture(new Texture(RitualFx.SPRITES, false, false))
+                    .texture(new RenderPhase.Texture(RitualFx.SPRITES, false, false))
                     .transparency(LIGHTNING_TRANSPARENCY)
                     .cull(DISABLE_CULLING)
                     .writeMaskState(COLOR_MASK)

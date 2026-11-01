@@ -200,6 +200,7 @@ public class SpyScreen extends Screen {
                 if (idx >= 0 && idx < targets.size() && !targets.get(idx).spectator()) {
                     PacketByteBuf buf = PacketByteBufs.create();
                     buf.writeUuid(targets.get(idx).uuid());
+                    SpyCamera.request();
                     ClientPlayNetworking.send(ModPackets.SPY_REQUEST, buf);
                     if (client.player != null) client.player.playSound(SoundEvents.BLOCK_SCULK_SENSOR_CLICKING, 0.6f, 0.5f);
                     close();

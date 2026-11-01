@@ -2,8 +2,8 @@ package com.h3artless.shadowbound.client.hud;
 
 import com.h3artless.shadowbound.Shadowbound;
 import com.h3artless.shadowbound.client.ClientShadowState;
-import com.h3artless.shadowbound.item.TotemOfShadownessItem;
 import com.h3artless.shadowbound.meter.DarknessMeter;
+import com.h3artless.shadowbound.registry.ModItems;
 import com.h3artless.shadowbound.spy.SpyManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
@@ -28,7 +28,8 @@ public final class DarknessMeterHud {
     public static void tick(MinecraftClient client) {
         prevAlpha = alpha;
         prevShown = shown;
-        boolean visible = client.player != null && TotemOfShadownessItem.isHolding(client.player);
+        boolean visible = client.player != null && (DarknessMeter.attuned(client.player)
+                || client.player.getMainHandStack().isOf(ModItems.SHADOW_KEY) || client.player.getOffHandStack().isOf(ModItems.SHADOW_KEY));
         alpha = MathHelper.clamp(alpha + (visible ? 0.12f : -0.08f), 0f, 1f);
         shown += (ClientShadowState.darkness() - shown) * 0.25f;
     }

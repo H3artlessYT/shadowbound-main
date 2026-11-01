@@ -1,5 +1,6 @@
 package com.h3artless.shadowbound.item;
 
+import com.h3artless.shadowbound.registry.ModItems;
 import com.h3artless.shadowbound.ritual.ShadowRitual;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
@@ -38,6 +39,14 @@ public class ShadowPaperItem extends Item {
     public static int step(ItemStack stack) {
         NbtCompound nbt = stack.getNbt();
         return nbt == null ? 0 : Math.floorMod(nbt.getInt(STEP), ShadowRitual.STEPS);
+    }
+
+    public static ItemStack create(ShadowRitual rite, int step) {
+        ItemStack stack = new ItemStack(ModItems.SHADOW_PAPER);
+        NbtCompound nbt = stack.getOrCreateNbt();
+        nbt.putString(KEY, rite.key());
+        nbt.putInt(STEP, Math.floorMod(step, ShadowRitual.STEPS));
+        return stack;
     }
 
     private static void assign(ItemStack stack, World world) {

@@ -4,6 +4,7 @@ import com.h3artless.shadowbound.Shadowbound;
 import com.h3artless.shadowbound.entity.GrimoireEntity;
 import com.h3artless.shadowbound.entity.RitualEntity;
 import com.h3artless.shadowbound.entity.ShadowCloneEntity;
+import com.h3artless.shadowbound.entity.ShadowHookEntity;
 import com.h3artless.shadowbound.entity.SoulPylonEntity;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
@@ -49,9 +50,26 @@ public final class ModEntities {
                     .fireImmune()
                     .build());
 
+    public static final EntityType<ShadowHookEntity> SHADOW_HOOK = Registry.register(Registries.ENTITY_TYPE,
+            Shadowbound.id("shadow_hook"),
+            FabricEntityTypeBuilder.<ShadowHookEntity>create(SpawnGroup.MISC, ShadowHookEntity::new)
+                    .dimensions(EntityDimensions.fixed(0.3f, 0.3f))
+                    .trackRangeBlocks(96)
+                    .trackedUpdateRate(1)
+                    .fireImmune()
+                    .build());
+
+    public static final EntityType<com.h3artless.shadowbound.entity.ShadowRobotEntity> SHADOW_ROBOT = Registry.register(Registries.ENTITY_TYPE,
+            Shadowbound.id("shadow_robot"),
+            FabricEntityTypeBuilder.<com.h3artless.shadowbound.entity.ShadowRobotEntity>create(SpawnGroup.MISC, com.h3artless.shadowbound.entity.ShadowRobotEntity::new)
+                    .dimensions(EntityDimensions.fixed(0.6f, 1.5f))
+                    .trackRangeBlocks(64)
+                    .build());
+
     private ModEntities() {}
 
     public static void init() {
         FabricDefaultAttributeRegistry.register(SHADOW_CLONE, ShadowCloneEntity.createCloneAttributes());
+        FabricDefaultAttributeRegistry.register(SHADOW_ROBOT, com.h3artless.shadowbound.entity.ShadowRobotEntity.createRobotAttributes());
     }
 }

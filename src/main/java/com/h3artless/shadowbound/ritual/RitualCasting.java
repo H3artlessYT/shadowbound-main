@@ -31,6 +31,10 @@ public final class RitualCasting {
             fail(player, book, "message.shadowbound.cast.unknown");
             return;
         }
+        if (ritual == ShadowRitual.BOX && BoxOnceState.get(world.getServer()).made()) {
+            fail(player, book, "message.shadowbound.cast.box_once");
+            return;
+        }
         if (!world.isNight()) {
             fail(player, book, "message.shadowbound.cast.day");
             return;
@@ -53,6 +57,7 @@ public final class RitualCasting {
         rite.setRitual(ritual);
         rite.refreshPositionAndAngles(at.x, at.y, at.z, 0, 0);
         world.spawnEntity(rite);
+        if (ritual == ShadowRitual.BOX) BoxOnceState.get(world.getServer()).mark();
         book.returnTo(player, true);
     }
 

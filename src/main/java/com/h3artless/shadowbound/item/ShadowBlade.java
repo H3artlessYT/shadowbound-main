@@ -44,7 +44,7 @@ import java.util.List;
 
 public interface ShadowBlade {
     int MAX_SHADOWS = 5;
-    float SHADOW_MAX_HEALTH = 20.0f;
+    float SHADOW_MAX_HEALTH = 10.0f;
     int SHADOW_LIFETIME = 20 * 60;
     double BONUS_REACH = 0.5;
     String NBT_KEY = "Shadows";
@@ -67,6 +67,7 @@ public interface ShadowBlade {
     static void onKill(ServerWorld world, ServerPlayerEntity player, LivingEntity killed) {
         ItemStack stack = player.getMainHandStack();
         if (!isBlade(stack) || !canCapture(killed)) return;
+        if (ShadowPouchItem.tryStore(world, player, killed)) return;
 
         NbtList list = shadows(stack);
         if (list.size() >= MAX_SHADOWS) return;
@@ -122,6 +123,7 @@ public interface ShadowBlade {
         if (!(e instanceof MobEntity)) return false;
         if (e instanceof EnderDragonEntity || e instanceof WitherEntity || e instanceof WardenEntity) return false;
         if (e instanceof ShadowCloneEntity) return false;
+        if (!com.h3artless.shadowbound.config.ShadowConfig.mayCast(e.getType())) return false;
         return !(e instanceof ShadowMob s && s.shadowbound$isShadow());
     }
 
@@ -179,7 +181,7 @@ public interface ShadowBlade {
         }
 
         EntityAttributeInstance hp = mob.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-        if (hp != null && hp.getBaseValue() > SHADOW_MAX_HEALTH) {
+        if (hp != null) {
             hp.setBaseValue(SHADOW_MAX_HEALTH);
         }
         mob.setHealth(mob.getMaxHealth());
@@ -195,7 +197,7 @@ public interface ShadowBlade {
     static void tooltip(ItemStack stack, List<Text> tooltip) {
         NbtList list = shadows(stack);
         tooltip.add(Text.translatable("tooltip.shadowbound.blade.count", list.size(), MAX_SHADOWS)
-                .formatted(Formatting.DARK_PURPLE));
+                .formatted(Formatting.DARK_RED));
         for (int i = 0; i < list.size(); i++) {
             NbtCompound entry = list.getCompound(i);
             Text name = displayName(entry);

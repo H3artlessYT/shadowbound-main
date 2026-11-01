@@ -4,11 +4,15 @@
   "package": "com.h3artless.shadowbound.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "ItemEntityCauldronMixin",
+    "KatanaMixin",
     "LivingEntityMixin",
     "MobEntityAccessor",
     "MobEntityMixin",
+    "PlayerClottingMixin",
     "PlayerDiveMixin",
-    "PlayerEntityMixin"
+    "PlayerEntityMixin",
+    "ShadowDeathMessageMixin"
   ],
   "client": [
     "client.BipedEntityModelMixin",
@@ -22,8 +26,14 @@
     "client.KeyboardInputMixin",
     "client.LivingEntityRendererMixin",
     "client.MinecraftClientMixin",
+    "client.MouseScrollMixin",
     "client.PlayerEntityRendererMixin",
-    "client.PostEffectProcessorAccessor"
+    "client.PostEffectProcessorAccessor",
+    "client.SpyKeyLockMixin",
+    "client.SpyMouseLockMixin",
+    "client.TridentRiptideFeatureMixin",
+    "client.RiptideFovMixin",
+    "client.GameRendererFovInvoker"
   ],
   "injectors": {
     "defaultRequire": 1

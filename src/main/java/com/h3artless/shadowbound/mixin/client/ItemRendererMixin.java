@@ -1,6 +1,7 @@
 package com.h3artless.shadowbound.mixin.client;
 
 import com.h3artless.shadowbound.client.render.BladeModels;
+import com.h3artless.shadowbound.client.render.HookVisuals;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.BakedModel;
@@ -19,6 +20,10 @@ public abstract class ItemRendererMixin {
     private void shadowbound$heldModel(ItemStack stack, ModelTransformationMode mode, boolean leftHanded, MatrixStack matrices,
                                        VertexConsumerProvider buffers, int light, int overlay, BakedModel model, CallbackInfo ci) {
         if (stack.isEmpty() || BladeModels.usesFlatModel(mode)) return;
+        if (HookVisuals.renderHeld(stack, mode, leftHanded, matrices, buffers, light, overlay)) {
+            ci.cancel();
+            return;
+        }
         BakedModel held = BladeModels.heldModelFor(stack);
         if (held == null || held == model) return;
         ci.cancel();
